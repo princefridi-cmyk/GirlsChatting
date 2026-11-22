@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GirlsChatting - Connect & Chat</title>
+  <style>
+    :root {
+      --primary: #e91e63;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #333333;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { margin: 0; font-size: 1.5rem; }
+    .container { padding: 1.5rem; max-width: 800px; margin: auto; }
+    .card { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+    input, button { width: 100%; padding: 0.75rem; margin-top: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    .hidden { display: none; }
+    #chat-box { height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
+    .message { margin-bottom: 0.5rem; padding: 0.4rem 0.8rem; border-radius: 4px; background: #eee; width: fit-content; }
+    .message.me { background: var(--primary); color: white; align-self: flex-end; margin-left: auto; }
+    .ad-banner { background: #e0e0e0; padding: 1rem; text-align: center; font-size: 0.8rem; color: #666; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>GirlsChatting</h1>
+    <div id="nav-actions">
+      <span id="user-display"></span>
+      <button id="logout-btn" class="hidden" style="width: auto; padding: 0.4rem 0.8rem;">Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- PUBLIC LANDING PAGE (AdSense Eligible) -->
+    <div id="public-section" class="card">
+      <h2>Welcome to GirlsChatting</h2>
+      <p>A safe and fun community to connect, make new friends, and share ideas!</p>
+      
+      <!-- Placeholder for AdSense Unit -->
+      <div class="ad-banner">
+        [ Google AdSense Banner Placement ]
+      </div>
+
+      <p>Join our growing network today to start private 1-on-1 conversations.</p>
+      <button onclick="showAuth('signup')">Create Account</button>
+      <button onclick="showAuth('login')" style="background:#555; margin-top:0.5rem;">Log In</button>
+    </div>
+
+    <!-- AUTHENTICATION FORM -->
+    <div id="auth-section" class="card hidden">
+      <h2 id="auth-title">Sign Up</h2>
+      <input type="email" id="email" placeholder="Email Address">
+      <input type="password" id="password" placeholder="Password">
+      <button id="auth-submit-btn" onclick="handleAuth()">Submit</button>
+      <p style="font-size:0.85rem; text-align:center; margin-top:1rem;">
+        <a href="#" onclick="toggleAuthMode()">Switch between Login / Sign Up</a>
+      </p>
+    </div>
+
+    <!-- PRIVATE CHAT SECTION (Requires Auth) -->
+    <div id="chat-section" class="card hidden">
+      <h2>Community Chat Room</h2>
+      <div id="chat-box"></div>
+      <div style="display:flex; gap:0.5rem;">
+        <input type="text" id="message-input" placeholder="Type a message..." style="margin:0;">
+        <button onclick="sendMessage()" style="width:100px; margin:0;">Send</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase JavaScript SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Your Firebase Configuration Keys
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3i_thpSKLxyfyblK8gojNJNhym-fXsB...",
+      authDomain: "girlschatting.firebaseapp.com",
+      projectId: "girlschatting",
+      storageBucket: "girlschatting.firebasestorage.app",
+      messagingSenderId: "664081016286",
+      appId: "1:664081016286:web:0c45...",
+      measurementId: "G-79QE5675J6"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let authMode = 'signup';
+    let currentUser = null;
+
+    // UI Navigation logic
+    window.showAuth = (mode) => {
+      authMode = mode;
+      document.getElementById('auth-title').innerText = mode === 'signup' ? 'Create Account' : 'Log In';
+      document.getElementById('public-section').classList.add('hidden');
+      document.getElementById('auth-section').classList.remove('hidden');
+    };
+
+    window.toggleAuthMode = () => {
+      showAuth(authMode === 'signup' ? 'login' : 'signup');
+    };
+
+    // Auth Handler
+    window.handleAuth = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      
+      try {
+        if (authMode === 'signup') {
+          await createUserWithEmailAndPassword(auth, email, pass);
+        } else {
+          await signInWithEmailAndPassword(auth, email, pass);
+        }
+      } catch (err) {
+        alert("Auth Error: " + err.message);
+      }
+    };
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+    // Auth Observer
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        document.getElementById('public-section').classList.add('hidden');
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('chat-section').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        document.getElementById('user-display').innerText = user.email;
+        loadMessages();
+      } else {
+        document.getElementById('public-section').classList.remove('hidden');
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('chat-section').classList.add('hidden');
+        document.getElementById('logout-btn').classList.add('hidden');
+        document.getElementById('user-display').innerText = '';
+      }
+    });
+
+    // Send Real-time Chat Message
+    window.sendMessage = async () => {
+      const input = document.getElementById('message-input');
+      if (!input.value.trim() || !currentUser) return;
+
+      await addDoc(collection(db, "messages"), {
+        text: input.value,
+        sender: currentUser.email,
+        timestamp: serverTimestamp()
+      });
+      input.value = '';
+    };
+
+    // Load Chat Messages Real-time
+    function loadMessages() {
+      const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+      onSnapshot(q, (snapshot) => {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML = '';
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const msgDiv = document.createElement('div');
+          const isMe = data.sender === currentUser.email;
+          msgDiv.className = `message ${isMe ? 'me' : ''}`;
+          msgDiv.innerText = `${data.sender.split('@')[0]}: ${data.text}`;
+          chatBox.appendChild(msgDiv);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+  </script>
+</body>
+</html>
