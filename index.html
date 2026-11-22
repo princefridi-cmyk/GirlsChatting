@@ -1,199 +1,255 @@
 <!DOCTYPE html>
 <html lang="ur" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GirlsChatting - Connect & Chat</title>
-  <style>
-    :root {
-      --primary: #e91e63;
-      --bg: #f8f9fa;
-      --card-bg: #ffffff;
-      --text: #333333;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg);
-      color: var(--text);
-    }
-    header {
-      background: var(--primary);
-      color: white;
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header h1 { margin: 0; font-size: 1.5rem; }
-    .container { padding: 1.5rem; max-width: 800px; margin: auto; }
-    .card { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-    input, button { width: 100%; padding: 0.75rem; margin-top: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
-    button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    .hidden { display: none; }
-    #chat-box { height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
-    .message { margin-bottom: 0.5rem; padding: 0.4rem 0.8rem; border-radius: 4px; background: #eee; width: fit-content; }
-    .message.me { background: var(--primary); color: white; align-self: flex-end; margin-left: auto; }
-    .ad-banner { background: #e0e0e0; padding: 1rem; text-align: center; font-size: 0.8rem; color: #666; margin: 1rem 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GirlsChatting - Private & Community Chat</title>
+    <style>
+        :root {
+            --primary: #e91e63;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); }
+        header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .container { padding: 1rem; max-width: 600px; margin: auto; }
+        .card { background: var(--card-bg); padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+        input, button { width: 100%; padding: 0.75rem; margin: 0.5rem 0; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        #chat-box, #user-list { height: 250px; overflow-y: scroll; border: 1px solid #ddd; padding: 0.5rem; margin-bottom: 0.5rem; }
+        .message { margin-bottom: 0.5rem; padding: 0.5rem; border-radius: 4px; }
+        .msg-me { background: #ffebee; text-align: right; }
+        .msg-other { background: #f1f0f0; }
+        .user-item { padding: 0.5rem; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
+        .user-item:hover { background: #f0f0f0; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: gray; display: inline-block; }
+        .status-online { background: #4caf50; }
+    </style>
 </head>
 <body>
 
-  <header>
+<header>
     <h1>GirlsChatting</h1>
     <div id="nav-actions">
-      <span id="user-display"></span>
-      <button id="logout-btn" class="hidden" style="width: auto; padding: 0.4rem 0.8rem;">Logout</button>
+        <span id="user-display"></span>
+        <button id="logout-btn" class="hidden" onclick="logout()">Logout</button>
     </div>
-  </header>
+</header>
 
-  <div class="container">
-
-    <!-- PUBLIC LANDING PAGE (AdSense Eligible) -->
-    <div id="public-section" class="card">
-      <h2>Welcome to GirlsChatting</h2>
-      <p>A safe and fun community to connect, make new friends, and share ideas!</p>
-      
-      <!-- Placeholder for AdSense Unit -->
-      <div class="ad-banner">
-        [ Google AdSense Banner Placement ]
-      </div>
-
-      <p>Join our growing network today to start private 1-on-1 conversations.</p>
-      <button onclick="showAuth('signup')">Create Account</button>
-      <button onclick="showAuth('login')" style="background:#555; margin-top:0.5rem;">Log In</button>
+<div class="container">
+    <!-- AUTH SECTION -->
+    <div id="auth-section" class="card">
+        <h2 id="auth-title">Sign Up</h2>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        <button id="auth-submit-btn" onclick="handleAuth()">Submit</button>
+        <p style="text-align: center;">
+            <a href="#" onclick="toggleAuthMode()">Switch between Login / Sign Up</a>
+        </p>
     </div>
 
-    <!-- AUTHENTICATION FORM -->
-    <div id="auth-section" class="card hidden">
-      <h2 id="auth-title">Sign Up</h2>
-      <input type="email" id="email" placeholder="Email Address">
-      <input type="password" id="password" placeholder="Password">
-      <button id="auth-submit-btn" onclick="handleAuth()">Submit</button>
-      <p style="font-size:0.85rem; text-align:center; margin-top:1rem;">
-        <a href="#" onclick="toggleAuthMode()">Switch between Login / Sign Up</a>
-      </p>
+    <!-- MAIN APP SECTION -->
+    <div id="app-section" class="hidden">
+        <div>
+            <button id="tab-community" onclick="switchTab('community')">Community Chat</button>
+            <button id="tab-users" onclick="switchTab('users')">Users List</button>
+        </div>
+
+        <!-- COMMUNITY CHAT -->
+        <div id="community-tab">
+            <h3>Community Chat Room</h3>
+            <div id="community-chat-box"></div>
+            <input type="text" id="community-input" placeholder="Type a message...">
+            <button onclick="sendCommunityMessage()">Send</button>
+        </div>
+
+        <!-- USERS & PRIVATE CHAT -->
+        <div id="users-tab" class="hidden">
+            <h3>Online Users</h3>
+            <div id="user-list"></div>
+            <div id="private-chat-area" class="hidden">
+                <h4 id="private-chat-title">Private Chat</h4>
+                <div id="private-chat-box"></div>
+                <input type="text" id="private-input" placeholder="Type a private message...">
+                <button onclick="sendPrivateMessage()">Send Private Message</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- PRIVATE CHAT SECTION (Requires Auth) -->
-    <div id="chat-section" class="card hidden">
-      <h2>Community Chat Room</h2>
-      <div id="chat-box"></div>
-      <div style="display:flex; gap:0.5rem;">
-        <input type="text" id="message-input" placeholder="Type a message..." style="margin:0;">
-        <button onclick="sendMessage()" style="width:100px; margin:0;">Send</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Firebase JavaScript SDKs -->
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-const firebaseConfig = {
-  apiKey: "AIzaSyA3i_thpSKLxyfybLK8gojNJNhym-fXsBE",
-  authDomain: "girlschatting.firebaseapp.com",
-  projectId: "girlschatting",
-  storageBucket: "girlschatting.firebasestorage.app",
-  messagingSenderId: "664081016286",
-  appId: "1:664081016286:web:0c45adad172b1b7593294f",
-  measurementId: "G-79QE5675J6"
-};
-      
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Initialize Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3i_thpSKLxyfybLK8gojNJNhym-FXsBE",
+        authDomain: "girlschatting.firebaseapp.com",
+        projectId: "girlschatting",
+        storageBucket: "girlschatting.firebasestorage.app",
+        messagingSenderId: "664081016286",
+        appId: "1:664081016286:web:0c45adad12b1b7593294f",
+        measurementId: "G-79QE5675J6"
+    };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
     let authMode = 'signup';
     let currentUser = null;
-
-    // UI Navigation logic
-    window.showAuth = (mode) => {
-      authMode = mode;
-      document.getElementById('auth-title').innerText = mode === 'signup' ? 'Create Account' : 'Log In';
-      document.getElementById('public-section').classList.add('hidden');
-      document.getElementById('auth-section').classList.remove('hidden');
-    };
+    let activeChatUser = null;
+    let communityUnsub = null;
+    let privateUnsub = null;
 
     window.toggleAuthMode = () => {
-      showAuth(authMode === 'signup' ? 'login' : 'signup');
+        authMode = authMode === 'signup' ? 'login' : 'signup';
+        document.getElementById('auth-title').innerText = authMode === 'signup' ? 'Sign Up' : 'Login';
+        document.getElementById('auth-submit-btn').innerText = authMode === 'signup' ? 'Submit' : 'Login';
     };
 
-    // Auth Handler
     window.handleAuth = async () => {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('password').value;
-      
-      try {
-        if (authMode === 'signup') {
-          await createUserWithEmailAndPassword(auth, email, pass);
-        } else {
-          await signInWithEmailAndPassword(auth, email, pass);
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        try {
+            let userCredential;
+            if (authMode === 'signup') {
+                userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", userCredential.user.uid), {
+                    email: email,
+                    status: 'online',
+                    lastSeen: serverTimestamp()
+                });
+            } else {
+                userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                await updateDoc(doc(db, "users", userCredential.user.uid), { status: 'online' });
+            }
+        } catch (err) {
+            alert("Auth Error: " + err.message);
         }
-      } catch (err) {
-        alert("Auth Error: " + err.message);
-      }
     };
 
-    // Logout
-    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    window.logout = async () => {
+        if (currentUser) {
+            await updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' });
+        }
+        await signOut(auth);
+    };
 
-    // Auth Observer
-    onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-      if (user) {
-        document.getElementById('public-section').classList.add('hidden');
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('chat-section').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        document.getElementById('user-display').innerText = user.email;
-        loadMessages();
-      } else {
-        document.getElementById('public-section').classList.remove('hidden');
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('chat-section').classList.add('hidden');
-        document.getElementById('logout-btn').classList.add('hidden');
-        document.getElementById('user-display').innerText = '';
-      }
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('app-section').classList.remove('hidden');
+            document.getElementById('logout-btn').classList.remove('hidden');
+            document.getElementById('user-display').innerText = user.email;
+            startCommunityChat();
+            loadUserList();
+        } else {
+            if (currentUser) {
+                await updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).catch(() => {});
+            }
+            currentUser = null;
+            if (communityUnsub) communityUnsub();
+            if (privateUnsub) privateUnsub();
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('app-section').classList.add('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+        }
     });
 
-    // Send Real-time Chat Message
-    window.sendMessage = async () => {
-      const input = document.getElementById('message-input');
-      if (!input.value.trim() || !currentUser) return;
-
-      await addDoc(collection(db, "messages"), {
-        text: input.value,
-        sender: currentUser.email,
-        timestamp: serverTimestamp()
-      });
-      input.value = '';
+    window.switchTab = (tab) => {
+        document.getElementById('community-tab').classList.add('hidden');
+        document.getElementById('users-tab').classList.add('hidden');
+        if (tab === 'community') {
+            document.getElementById('community-tab').classList.remove('hidden');
+        } else {
+            document.getElementById('users-tab').classList.remove('hidden');
+        }
     };
 
-    // Load Chat Messages Real-time
-    function loadMessages() {
-      const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
-      onSnapshot(q, (snapshot) => {
-        const chatBox = document.getElementById('chat-box');
-        chatBox.innerHTML = '';
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          const msgDiv = document.createElement('div');
-          const isMe = data.sender === currentUser.email;
-          msgDiv.className = `message ${isMe ? 'me' : ''}`;
-          msgDiv.innerText = `${data.sender.split('@')[0]}: ${data.text}`;
-          chatBox.appendChild(msgDiv);
+    function startCommunityChat() {
+        const q = query(collection(db, "community_messages"), orderBy("timestamp", "asc"));
+        communityUnsub = onSnapshot(q, (snapshot) => {
+            const box = document.getElementById('community-chat-box');
+            box.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const isMe = data.sender === currentUser.email;
+                const div = document.createElement('div');
+                div.className = `message ${isMe ? 'msg-me' : 'msg-other'}`;
+                div.innerText = `${data.sender}: ${data.text}`;
+                box.appendChild(div);
+            });
+            box.scrollTop = box.scrollHeight;
         });
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
     }
-  </script>
+
+    window.sendCommunityMessage = async () => {
+        const input = document.getElementById('community-input');
+        if (!input.value.trim() || !currentUser) return;
+        await addDoc(collection(db, "community_messages"), {
+            text: input.value,
+            sender: currentUser.email,
+            timestamp: serverTimestamp()
+        });
+        input.value = '';
+    };
+
+    async function loadUserList() {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const listDiv = document.getElementById('user-list');
+        listDiv.innerHTML = '';
+        querySnapshot.forEach(docSnap => {
+            const user = docSnap.data();
+            if (docSnap.id !== currentUser.uid) {
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                div.innerHTML = `<span>${user.email}</span><span class="status-dot ${user.status === 'online' ? 'status-online' : ''}"></span>`;
+                div.onclick = () => startPrivateChat(docSnap.id, user.email);
+                listDiv.appendChild(div);
+            }
+        });
+    }
+
+    function startPrivateChat(targetUid, targetEmail) {
+        activeChatUser = targetUid;
+        document.getElementById('private-chat-title').innerText = "Chat with " + targetEmail;
+        document.getElementById('private-chat-area').classList.remove('hidden');
+
+        const chatId = [currentUser.uid, targetUid].sort().join('_');
+        if (privateUnsub) privateUnsub();
+
+        const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
+        privateUnsub = onSnapshot(q, (snapshot) => {
+            const box = document.getElementById('private-chat-box');
+            box.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const isMe = data.sender === currentUser.email;
+                const div = document.createElement('div');
+                div.className = `message ${isMe ? 'msg-me' : 'msg-other'}`;
+                div.innerText = `${data.sender.split('@')[0]}: ${data.text}`;
+                box.appendChild(div);
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    window.sendPrivateMessage = async () => {
+        const input = document.getElementById('private-input');
+        if (!input.value.trim() || !activeChatUser) return;
+        const chatId = [currentUser.uid, activeChatUser].sort().join('_');
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+            text: input.value,
+            sender: currentUser.email,
+            timestamp: serverTimestamp()
+        });
+        input.value = '';
+    };
+</script>
+
 </body>
 </html>
