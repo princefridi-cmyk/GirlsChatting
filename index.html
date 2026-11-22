@@ -3,77 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GirlsChatting - Private & Community Chat</title>
+    <title>GirlsChatting - Live Chat Room</title>
     <style>
         :root {
             --primary: #e91e63;
             --bg: #f8f9fa;
             --card-bg: #ffffff;
             --text: #333333;
+            --online: #4caf50;
         }
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); }
         header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .container { padding: 1rem; max-width: 600px; margin: auto; }
-        .card { background: var(--card-bg); padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-        input, button { width: 100%; padding: 0.75rem; margin: 0.5rem 0; box-sizing: border-box; }
-        button { background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .container { padding: 1rem; max-width: 900px; margin: auto; }
+        .search-box { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+        .profile-card { background: var(--card-bg); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; text-align: center; position: relative; padding: 1rem; }
+        .status-badge { position: absolute; top: 10px; left: 10px; padding: 2px 8px; border-radius: 12px; color: white; font-size: 0.75rem; font-weight: bold; }
+        .status-online { background-color: var(--online); }
+        .status-offline { background-color: #9e9e9e; }
+        .profile-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.5rem; background-color: #eee; }
+        .profile-name { font-weight: bold; margin-bottom: 0.5rem; display: block; }
+        .chat-btn { background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .chat-btn:hover { opacity: 0.9; }
         .hidden { display: none; }
-        #chat-box, #user-list { height: 250px; overflow-y: scroll; border: 1px solid #ddd; padding: 0.5rem; margin-bottom: 0.5rem; }
+        #chat-area { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 1rem; }
+        #messages-box { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; }
         .message { margin-bottom: 0.5rem; padding: 0.5rem; border-radius: 4px; }
         .msg-me { background: #ffebee; text-align: right; }
         .msg-other { background: #f1f0f0; }
-        .user-item { padding: 0.5rem; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
-        .user-item:hover { background: #f0f0f0; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: gray; display: inline-block; }
-        .status-online { background: #4caf50; }
+        .auth-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; margin: 2rem auto; }
+        .auth-card input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .auth-card button { width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>GirlsChatting</h1>
-    <div id="nav-actions">
-        <span id="user-display"></span>
-        <button id="logout-btn" class="hidden" onclick="logout()">Logout</button>
+    <div>
+        <span id="user-email"></span>
+        <button onclick="logout()" id="logout-btn" class="hidden" style="background:none; border:none; color:white; cursor:pointer; text-decoration:underline;">Logout</button>
     </div>
 </header>
 
 <div class="container">
-    <!-- AUTH SECTION -->
-    <div id="auth-section" class="card">
+    <!-- Auth Section -->
+    <div id="auth-section" class="auth-card">
         <h2 id="auth-title">Sign Up</h2>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password">
-        <button id="auth-submit-btn" onclick="handleAuth()">Submit</button>
-        <p style="text-align: center;">
-            <a href="#" onclick="toggleAuthMode()">Switch between Login / Sign Up</a>
+        <button id="auth-btn" onclick="handleAuth()">Submit</button>
+        <p style="text-align: center; margin-top: 1rem;">
+            <a href="#" onclick="toggleMode()" id="toggle-link">Switch to Login</a>
         </p>
     </div>
 
-    <!-- MAIN APP SECTION -->
+    <!-- Main App Section -->
     <div id="app-section" class="hidden">
-        <div>
-            <button id="tab-community" onclick="switchTab('community')">Community Chat</button>
-            <button id="tab-users" onclick="switchTab('users')">Users List</button>
-        </div>
+        <input type="text" id="search-box" class="search-box" placeholder="Search users by email or username..." onkeyup="filterUsers()">
+        
+        <div id="profiles-grid" class="grid-container"></div>
 
-        <!-- COMMUNITY CHAT -->
-        <div id="community-tab">
-            <h3>Community Chat Room</h3>
-            <div id="community-chat-box"></div>
-            <input type="text" id="community-input" placeholder="Type a message...">
-            <button onclick="sendCommunityMessage()">Send</button>
-        </div>
-
-        <!-- USERS & PRIVATE CHAT -->
-        <div id="users-tab" class="hidden">
-            <h3>Online Users</h3>
-            <div id="user-list"></div>
-            <div id="private-chat-area" class="hidden">
-                <h4 id="private-chat-title">Private Chat</h4>
-                <div id="private-chat-box"></div>
-                <input type="text" id="private-input" placeholder="Type a private message...">
-                <button onclick="sendPrivateMessage()">Send Private Message</button>
+        <!-- Private Chat Section -->
+        <div id="chat-area" class="hidden">
+            <h3 id="chat-with-title">Chat</h3>
+            <div id="messages-box"></div>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="message-input" placeholder="Type a message..." style="flex-grow: 1; padding: 0.5rem;">
+                <button onclick="sendMessage()" style="width: auto; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">Send</button>
             </div>
         </div>
     </div>
@@ -82,7 +79,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA3i_thpSKLxyfybLK8gojNJNhym-FXsBE",
@@ -98,42 +95,38 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let authMode = 'signup';
+    let isLoginMode = false;
     let currentUser = null;
-    let activeChatUser = null;
-    let communityUnsub = null;
-    let privateUnsub = null;
+    let activeChatPartner = null;
+    let unsubscribeMessages = null;
+    let unsubscribeUsers = null;
 
-    window.toggleAuthMode = () => {
-        authMode = authMode === 'signup' ? 'login' : 'signup';
-        document.getElementById('auth-title').innerText = authMode === 'signup' ? 'Sign Up' : 'Login';
-        document.getElementById('auth-submit-btn').innerText = authMode === 'signup' ? 'Submit' : 'Login';
+    window.toggleMode = () => {
+        isLoginMode = !isLoginMode;
+        document.getElementById('auth-title').innerText = isLoginMode ? 'Login' : 'Sign Up';
+        document.getElementById('auth-btn').innerText = isLoginMode ? 'Login' : 'Submit';
+        document.getElementById('toggle-link').innerText = isLoginMode ? 'Switch to Sign Up' : 'Switch to Login';
     };
 
     window.handleAuth = async () => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
         try {
-            let userCredential;
-            if (authMode === 'signup') {
-                userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", userCredential.user.uid), {
-                    email: email,
-                    status: 'online',
-                    lastSeen: serverTimestamp()
-                });
+            if (isLoginMode) {
+                const res = await signInWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", res.user.uid), { email, status: 'online' }, { merge: true });
             } else {
-                userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                await updateDoc(doc(db, "users", userCredential.user.uid), { status: 'online' });
+                const res = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", res.user.uid), { email, status: 'online' });
             }
-        } catch (err) {
-            alert("Auth Error: " + err.message);
+        } catch (error) {
+            alert(error.message);
         }
     };
 
     window.logout = async () => {
         if (currentUser) {
-            await updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' });
+            await updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).catch(() => {});
         }
         await signOut(auth);
     };
@@ -141,109 +134,92 @@
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
+            document.getElementById('user-email').innerText = user.email;
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
-            document.getElementById('user-display').innerText = user.email;
-            startCommunityChat();
-            loadUserList();
+            listenToUsers();
         } else {
-            if (currentUser) {
-                await updateDoc(doc(db, "users", currentUser.uid), { status: 'offline' }).catch(() => {});
-            }
-            currentUser = null;
-            if (communityUnsub) communityUnsub();
-            if (privateUnsub) privateUnsub();
+            if (unsubscribeUsers) unsubscribeUsers();
+            if (unsubscribeMessages) unsubscribeMessages();
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('app-section').classList.add('hidden');
             document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('chat-area').classList.add('hidden');
+            currentUser = null;
         }
     });
 
-    window.switchTab = (tab) => {
-        document.getElementById('community-tab').classList.add('hidden');
-        document.getElementById('users-tab').classList.add('hidden');
-        if (tab === 'community') {
-            document.getElementById('community-tab').classList.remove('hidden');
-        } else {
-            document.getElementById('users-tab').classList.remove('hidden');
-        }
-    };
-
-    function startCommunityChat() {
-        const q = query(collection(db, "community_messages"), orderBy("timestamp", "asc"));
-        communityUnsub = onSnapshot(q, (snapshot) => {
-            const box = document.getElementById('community-chat-box');
-            box.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const isMe = data.sender === currentUser.email;
-                const div = document.createElement('div');
-                div.className = `message ${isMe ? 'msg-me' : 'msg-other'}`;
-                div.innerText = `${data.sender}: ${data.text}`;
-                box.appendChild(div);
+    function listenToUsers() {
+        if (unsubscribeUsers) unsubscribeUsers();
+        unsubscribeUsers = onSnapshot(collection(db, "users"), (querySnapshot) => {
+            const grid = document.getElementById('profiles-grid');
+            grid.innerHTML = '';
+            querySnapshot.forEach((docSnap) => {
+                const user = docSnap.data();
+                const uid = docSnap.id;
+                if (currentUser && uid !== currentUser.uid && user.email) {
+                    const card = document.createElement('div');
+                    card.className = 'profile-card';
+                    card.dataset.email = user.email.toLowerCase();
+                    const isOnline = user.status === 'online';
+                    const username = user.email.split('@')[0];
+                    card.innerHTML = `
+                        <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}">${isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random" class="profile-img" alt="Avatar">
+                        <span class="profile-name">${username}</span>
+                        <button class="chat-btn" onclick="startChat('${uid}', '${user.email}')">Chat Now</button>
+                    `;
+                    grid.appendChild(card);
+                }
             });
-            box.scrollTop = box.scrollHeight;
+            filterUsers();
         });
     }
 
-    window.sendCommunityMessage = async () => {
-        const input = document.getElementById('community-input');
-        if (!input.value.trim() || !currentUser) return;
-        await addDoc(collection(db, "community_messages"), {
-            text: input.value,
-            sender: currentUser.email,
-            timestamp: serverTimestamp()
+    window.filterUsers = () => {
+        const searchVal = document.getElementById('search-box').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.profile-card');
+        cards.forEach(card => {
+            const email = card.dataset.email || '';
+            card.style.display = email.includes(searchVal) ? '' : 'none';
         });
-        input.value = '';
     };
 
-    async function loadUserList() {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        const listDiv = document.getElementById('user-list');
-        listDiv.innerHTML = '';
-        querySnapshot.forEach(docSnap => {
-            const user = docSnap.data();
-            if (docSnap.id !== currentUser.uid) {
-                const div = document.createElement('div');
-                div.className = 'user-item';
-                div.innerHTML = `<span>${user.email}</span><span class="status-dot ${user.status === 'online' ? 'status-online' : ''}"></span>`;
-                div.onclick = () => startPrivateChat(docSnap.id, user.email);
-                listDiv.appendChild(div);
-            }
-        });
-    }
+    window.startChat = (partnerUid, partnerEmail) => {
+        activeChatPartner = partnerUid;
+        document.getElementById('chat-with-title').innerText = "Chat with " + partnerEmail.split('@')[0];
+        document.getElementById('chat-area').classList.remove('hidden');
+        document.getElementById('chat-area').scrollIntoView({ behavior: 'smooth' });
 
-    function startPrivateChat(targetUid, targetEmail) {
-        activeChatUser = targetUid;
-        document.getElementById('private-chat-title').innerText = "Chat with " + targetEmail;
-        document.getElementById('private-chat-area').classList.remove('hidden');
+        if (unsubscribeMessages) unsubscribeMessages();
 
-        const chatId = [currentUser.uid, targetUid].sort().join('_');
-        if (privateUnsub) privateUnsub();
-
+        const chatId = [currentUser.uid, partnerUid].sort().join('_');
         const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
-        privateUnsub = onSnapshot(q, (snapshot) => {
-            const box = document.getElementById('private-chat-box');
+        
+        unsubscribeMessages = onSnapshot(q, (snapshot) => {
+            const box = document.getElementById('messages-box');
             box.innerHTML = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const isMe = data.sender === currentUser.email;
+            snapshot.forEach(docSnap => {
+                const msg = docSnap.data();
+                const isMe = msg.sender === currentUser.email;
                 const div = document.createElement('div');
                 div.className = `message ${isMe ? 'msg-me' : 'msg-other'}`;
-                div.innerText = `${data.sender.split('@')[0]}: ${data.text}`;
+                div.innerText = msg.text;
                 box.appendChild(div);
             });
             box.scrollTop = box.scrollHeight;
         });
-    }
+    };
 
-    window.sendPrivateMessage = async () => {
-        const input = document.getElementById('private-input');
-        if (!input.value.trim() || !activeChatUser) return;
-        const chatId = [currentUser.uid, activeChatUser].sort().join('_');
+    window.sendMessage = async () => {
+        const input = document.getElementById('message-input');
+        const text = input.value.trim();
+        if (!text || !activeChatPartner) return;
+
+        const chatId = [currentUser.uid, activeChatPartner].sort().join('_');
         await addDoc(collection(db, "chats", chatId, "messages"), {
-            text: input.value,
+            text,
             sender: currentUser.email,
             timestamp: serverTimestamp()
         });
