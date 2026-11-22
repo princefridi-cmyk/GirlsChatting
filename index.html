@@ -96,15 +96,17 @@
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Your Firebase Configuration Keys
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3i_thpSKLxyfyblK8gojNJNhym-fXsB...",
-      authDomain: "girlschatting.firebaseapp.com",
-      projectId: "girlschatting",
-      storageBucket: "girlschatting.firebasestorage.app",
-      messagingSenderId: "664081016286",
-      appId: "1:664081016286:web:0c45...",
-      measurementId: "G-79QE5675J6"
-    };
+    const firebaseConfig = { // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyA3i_thpSKLxyfybLK8gojNJNhym-fXsBE",
+  authDomain: "girlschatting.firebaseapp.com",
+  projectId: "girlschatting",
+  storageBucket: "girlschatting.firebasestorage.app",
+  messagingSenderId: "664081016286",
+  appId: "1:664081016286:web:0c45adad172b1b7593294f",
+  measurementId: "G-79QE5675J6"
+};
+      
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
